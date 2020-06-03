@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import torch
+
 from torch import nn
 from torch.nn import functional as F
 
@@ -57,7 +58,7 @@ class DeepLabV3PlusDecoder(nn.Module):
         encoder_channels,
         out_channels=256,
         atrous_rates=(12, 24, 36),
-        output_stride=16,
+        output_stride=8,
     ):
         super().__init__()
         if output_stride not in {8, 16}:
@@ -77,7 +78,7 @@ class DeepLabV3PlusDecoder(nn.Module):
         self.up = nn.UpsamplingBilinear2d(scale_factor=scale_factor)
 
         highres_in_channels = encoder_channels[-4]
-        highres_out_channels = 48   # proposed by authors of paper
+        highres_out_channels = 48  # proposed by authors of paper
         self.block1 = nn.Sequential(
             nn.Conv2d(highres_in_channels, highres_out_channels, kernel_size=1, bias=False),
             nn.BatchNorm2d(highres_out_channels),
@@ -190,16 +191,15 @@ class ASPP(nn.Module):
 
 
 class SeparableConv2d(nn.Sequential):
-
     def __init__(
-            self,
-            in_channels,
-            out_channels,
-            kernel_size,
-            stride=1,
-            padding=0,
-            dilation=1,
-            bias=True,
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride=1,
+        padding=0,
+        dilation=1,
+        bias=True,
     ):
         dephtwise_conv = nn.Conv2d(
             in_channels,
